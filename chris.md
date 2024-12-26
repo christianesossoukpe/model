@@ -142,3 +142,136 @@ En résumé, ce code tokenise les descriptions textuelles, les convertit en séq
 
  
  
+
+
+
+
+
+ D'accord, continuons avec les étapes de tokenisation des descriptions, normalisation des prix, compilation, entraînement et évaluation du modèle. Voici le code complet avec des explications pour chaque étape :
+
+
+suite et fin
+### 1. Tokenize descriptions
+
+```python
+# Tokenize descriptions
+tokenizer = Tokenizer(num_words=1000, oov_token="<OOV>")
+tokenizer.fit_on_texts(data["description"])
+sequences = tokenizer.texts_to_sequences(data["description"])
+padded_sequences = pad_sequences(sequences, maxlen=100, padding='post')
+print(padded_sequences)
+```
+
+### 2. Normalize prices
+
+```python
+# Normalize prices
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+data["price_normalized"] = scaler.fit_transform(data[["price"]])
+print(data.head())
+```
+
+### 3. Préparer les données pour le modèle
+
+```python
+# Préparer les données pour le modèle
+X = padded_sequences
+y = data["type_encoded"]
+
+# Diviser les données en ensembles d'entraînement et de test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+```
+
+### 4. Définir le modèle
+
+```python
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout
+
+# Définir le modèle
+model = Sequential([
+    Embedding(input_dim=1000, output_dim=64, input_length=100),
+    LSTM(64, return_sequences=True),
+    Dropout(0.5),
+    LSTM(64),
+    Dropout(0.5),
+    Dense(1, activation='sigmoid')
+])
+```
+
+d
+
+
+### 5. Compiler le modèle
+
+```python
+# Compiler le modèle
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+```
+
+### 6. Entraîner le modèle
+
+```python
+# Entraîner le modèle
+history = model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.2)
+```
+
+### 7. Évaluer le modèle
+
+```python
+# Évaluer le modèle
+loss, accuracy = model.evaluate(X_test, y_test)
+print(f'Loss: {loss}')
+print(f'Accuracy: {accuracy}')
+```
+
+### 8. Visualiser les résultats
+
+```python
+# Visualiser les résultats
+plt.plot(history.history['accuracy'], label='accuracy')
+plt.plot(history.history['val_accuracy'], label='val_accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend(loc='lower right')
+plt.show()
+```
+
+### Explications
+
+1. **Tokenize descriptions** :
+   - `Tokenizer` : Crée une instance de `Tokenizer` pour convertir les descriptions textuelles en séquences de nombres.
+   - `fit_on_texts` : Ajuste le tokenizer sur les descriptions.
+   - `texts_to_sequences` : Convertit les descriptions en séquences de nombres.
+   - `pad_sequences` : Paddées les séquences pour qu'elles aient toutes la même longueur.
+
+2. **Normalize prices** :
+   - `StandardScaler` : Normalise les prix pour qu'ils aient une moyenne de 0 et un écart-type de 1.
+
+3. **Préparer les données pour le modèle** :
+   - `X` : Les séquences paddées des descriptions.
+   - `y` : Les labels encodés des types de produits.
+   - `train_test_split` : Divise les données en ensembles d'entraînement et de test.
+
+4. **Définir le modèle** :
+   - `Sequential` : Crée un modèle séquentiel.
+   - `Embedding` : Couche d'embedding pour convertir les séquences de nombres en vecteurs denses.
+   - `LSTM` : Couches LSTM pour capturer les dépendances temporelles dans les séquences.
+   - `Dropout` : Couches de dropout pour régulariser le modèle.
+   - `Dense` : Couche dense pour la sortie.
+
+5. **Compiler le modèle** :
+   - `compile` : Configure les paramètres d'entraînement, tels que l'optimiseur, la fonction de perte et les métriques d'évaluation.
+
+6. **Entraîner le modèle** :
+   - `fit` : Entraîne le modèle avec les données d'entraînement.
+
+7. **Évaluer le modèle** :
+   - `evaluate` : Évalue le modèle sur les données de test et affiche la perte et la précision.
+
+8. **Visualiser les résultats** :
+   - `plot` : Trace les courbes de précision pour l'entraînement et la validation.
+
+J'espère que cela vous aide à comprendre les étapes de tokenisation des descriptions, normalisation des prix, compilation, entraînement et évaluation du modèle en Python ! Si vous avez des questions supplémentaires, n'hésitez pas à demander.
